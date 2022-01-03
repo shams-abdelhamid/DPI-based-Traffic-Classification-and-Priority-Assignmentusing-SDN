@@ -2,8 +2,9 @@
 import pandas as pd 
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+
 
 # Read data from file 'filename.csv' 
 # (in the same directory that your python process is based)
@@ -43,6 +44,7 @@ y = df.iloc[:, 81].values
 
 scaler = StandardScaler().fit(x)
 x = scaler.transform(x)
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
 
 
 
