@@ -19,7 +19,7 @@ class Topology(Topo):
 
 def performTest():
     topo = Topology(k=2)
-    net = Mininet(topo = topo)
+    net = Mininet(topo = topo,controller=lambda name: RemoteController(name,ip='192.168.1.50',port=6633, switch=OVSSwitch))
     net.start()
     print "Displaying host information"
     dumpNodeConnections(net.hosts)
