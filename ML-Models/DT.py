@@ -1,8 +1,6 @@
 from preprocessing import x,y
-from sklearn.model_selection import train_test_split
 from sklearn import metrics
-X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
-
+from preprocessing import X_train,y_train,X_test,y_test
 
 
 
