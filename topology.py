@@ -1,6 +1,7 @@
 from mininet.TOPO import TOPO
 from mininet.net import Mininet
 from mininet.node import RemoteController,OVSSwitch
+from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 
@@ -24,13 +25,15 @@ def performTest():
     dumpNodeConnections(net.hosts)
     print "Testing Network Connectivity"
     net.pingAll()
-    # print "Checking Bandwidth between host h1 and host h2"
-    # h1,h2 = net.get('h1','h2')
-    # net.iperf((h1,h2))
+    print "Checking Bandwidth between host h1 and host h2"
+    h1,h2 = net.get('h1','h2')
+    net.iperf((h1,h2))
     net.stop()
 
 
 if __name__=='__main__':
+    #displaying more info 
+    setLogLevel('info')
     performTest()
 
 topos= {
