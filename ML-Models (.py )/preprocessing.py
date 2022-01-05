@@ -15,7 +15,9 @@ dataset = pd.read_csv("c:/Darknet_all.csv" , low_memory=False)
 df = pd.DataFrame(dataset)
 df = df.replace([np.inf, -np.inf], 0).fillna(0)
 df.drop('Flow ID', axis=1, inplace=True)
-
+df.drop(df['Label']).values[0]
+df.drop(df['Label']).values[1]
+print (df['Label'].value_counts(ascending=True))
 
 i=0
 for ip in df['Src IP'].values:
