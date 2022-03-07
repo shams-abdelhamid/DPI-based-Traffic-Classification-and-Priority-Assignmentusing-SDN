@@ -1,3 +1,17 @@
+# Copyright (C) 2011 Nippon Telegraph and Telephone Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from ryu.base import app_manager
 from ryu.controller import ofp_event
@@ -5,22 +19,21 @@ from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
-from ryu.lib.packet import ethernet
+from ryu.lib.packet import ethernet,udp
 from ryu.lib.packet import ether_types
-from ryu.topology import api as ryu_api
 
 
-class RyuSwitch(app_manager.RyuApp):
+class SimpleSwitch13(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
-        super(RyuSwitch, self).__init__(*args, **kwargs)
+        super(SimpleSwitch13, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
         datapath = ev.msg.datapath
-        ofp = datapath.ofproto
+        ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
         # install table-miss flow entry
@@ -30,18 +43,10 @@ class RyuSwitch(app_manager.RyuApp):
         # 128, OVS will send Packet-In with invalid buffer_id and
         # truncated packet data. In that case, we cannot output packets
         # correctly.  The bug has been fixed in OVS v2.1.0.
-        cookie=cookie_mask=0
-        table_id=0
-        idle_timeout=hard_timeout=0
-        priority=32768
-        buffer_id=ofp.OFP_NO_BUFFER
         match = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(ofp.OFPP_NORMAL,
-                                          0)]
-        inst = [parser.OFPInstructionActions(ofp.OFPIT_APPLYACTIONS,actions)]
-        req = parser.OFPFlowMod(datapath,cockie,cookie_mask,table_id,ofp.OFPFC_ADD,idle_timeout,hard_timeout,priority,buffer_id,ofp.OFPP_ANY,ofp.OFPG_ANY,ofp.OFPFF_SEND_FLOW_REM,match,inst)
-        datapath.send_msg(req)
-        self.add_flow(datapath, 0, match, actions)
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
+        self.add_flow(datapath, 270, match, actions)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto
@@ -72,9 +77,10 @@ class RyuSwitch(app_manager.RyuApp):
         in_port = msg.match['in_port']
 
         pkt = packet.Packet(msg.data)
+        
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-        ethx = pkt.protocols[1]
-
+        
+        
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
             # ignore lldp packet
             return
@@ -83,13 +89,10 @@ class RyuSwitch(app_manager.RyuApp):
         if src == "c6:bb:fe:03:70:db":
             self.logger.info("aywa")
         else:
-            self.logger.info(src)
-        hosts= ryu_api.get_host(self,None)
-        self.hosts = [(host.mac, ethx, {'port': host.port.port_no}) for host in hosts]
-        self.logger.info("Hosts %s", self.hosts)       
+            self.logger.info(src)                                    
         dpid = format(datapath.id, "d").zfill(16)
         self.mac_to_port.setdefault(dpid, {})
-        self.logger.info("packetsaya in %s %s %s %s", dpid, src, dst, in_port)
+        #self.logger.info("packetsaya in %s %s %s %s", dpid, src, dst, in_port)
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
@@ -98,7 +101,15 @@ class RyuSwitch(app_manager.RyuApp):
             out_port = self.mac_to_port[dpid][dst]
         else:
             out_port = ofproto.OFPP_FLOOD
+            
 
+        up = pkt.get_protocols(udp.udp)
+        DYPR=3
+        if len(up) >0:
+            print("protocol type: UDP")
+            DYPR=500
+        #self.logger.info(up)
+        
         actions = [parser.OFPActionOutput(out_port)]
 
         # install a flow to avoid packet_in next time
@@ -107,10 +118,10 @@ class RyuSwitch(app_manager.RyuApp):
             # verify if we have a valid buffer_id, if yes avoid to send both
             # flow_mod & packet_out
             if msg.buffer_id != ofproto.OFP_NO_BUFFER:
-                self.add_flow(datapath, 1, match, actions, msg.buffer_id)
+                self.add_flow(datapath, DYPR, match, actions, msg.buffer_id)
                 return
             else:
-                self.add_flow(datapath, 1, match, actions)
+                self.add_flow(datapath, DYPR, match, actions)
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
