@@ -2,6 +2,8 @@ import tkinter
 from tkinter import Button, Canvas, ttk
 
 #Window & Canvas
+def retrieve():
+    print(protocols.get())
 window = tkinter.Tk()
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
@@ -32,7 +34,7 @@ protocols.place(relx = 0.3, rely =0.31)
 
 #Add protocol button
 addProtocol = Button(window, text = "Add Protocol", bg = "#74CCE0", 
-fg = "white", font = ("Times New Roman", 18), width = 10, height = 1)
+fg = "white", font = ("Times New Roman", 18), width = 10, height = 1,command=retrieve)
 addProtocol.place(relx = 0.5, rely = 0.3)
 
 
