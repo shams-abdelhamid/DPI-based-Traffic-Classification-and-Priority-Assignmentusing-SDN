@@ -26,7 +26,6 @@ import json
 from flask import Flask,jsonify
 from ryu.controller.controller import Datapath
 from eventlet.green.socket import socket
-
 class SimpleSwitch13(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
@@ -51,7 +50,6 @@ class SimpleSwitch13(app_manager.RyuApp):
         match = parser.OFPMatch()
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
-
         self.add_flow(datapath, 270, match, actions)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
@@ -156,7 +154,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         if flag == "1":
             print("feha one")
             self.sendC(datapath)
-            
+        
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
