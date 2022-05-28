@@ -117,6 +117,20 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.mac_to_port.setdefault(dpid, {})
         #self.logger.info("packetsaya in %s %s %s %s", dpid, src, dst, in_port)
 
+        def switch_fl(info):
+            switcher ={
+                1: "1here",
+                2: "1here",
+                3: "3here",
+                4: "4here",
+                5: self.sendC(datapath)
+            }
+            print (switcher.get(info, "invalid"))
+
+        with open('FL.txt',"r") as flfile:
+            info = int(flfile.readline())
+            switch_fl(info)
+
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
 
