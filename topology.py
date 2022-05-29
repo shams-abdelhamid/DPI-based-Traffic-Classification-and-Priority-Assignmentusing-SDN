@@ -1,11 +1,11 @@
-from mininet.TOPO import TOPO
+from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.node import RemoteController,OVSSwitch
 from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 
-class Topology(Topo):
+class Topology(topo):
     print("Custom Topology Example.")
     def __init__(self,k=2):
         Topo.__init(self)
@@ -37,5 +37,5 @@ if __name__=='__main__':
     performTest()
 
 topos= {
-    'mytopo': custTopo
+    'mytopo': Topology
 }

@@ -23,6 +23,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet,udp
 from ryu.lib.packet import ether_types
 import json
+import os
 from flask import Flask,jsonify
 from ryu.controller.controller import Datapath
 from eventlet.green.socket import socket
@@ -116,19 +117,26 @@ class SimpleSwitch13(app_manager.RyuApp):
         dpid = format(datapath.id, "d").zfill(16)
         self.mac_to_port.setdefault(dpid, {})
         #self.logger.info("packetsaya in %s %s %s %s", dpid, src, dst, in_port)
+        def send():
+            self.sendC(datapath)
+            print("flows are sent")
+
+        def sendtany():
+            #self.sendC(datapath)
+            print("kda habal")
 
         def switch_fl(info):
             switcher ={
                 1: "1here",
                 2: "1here",
-                3: "3here",
-                4: "4here",
-                5: self.sendC(datapath)
+                3: lambda: sendtany(),
+                5: lambda: send(),
+                4: "4here"
             }
-            print (switcher.get(info, "invalid"))
+            print (switcher.get(info, lambda: "invalid")())
 
         with open('FL.txt',"r") as flfile:
-            info = int(flfile.readline())
+            info = int(flfile.read())
             switch_fl(info)
 
         # learn a mac address to avoid FLOOD next time.
@@ -165,7 +173,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         flag = f.read()
         if flag == "0":
             print("feha zero")
-        if flag == "1":
+        elif flag == "1":
             print("feha one")
             self.sendC(datapath)
         
@@ -178,13 +186,22 @@ class SimpleSwitch13(app_manager.RyuApp):
         datapath.send_msg(out)
 
     def sendC(self,dp):
+        with open('sendc.txt',"r") as flfile:
+            row = flfile.readlines()
+            print("printing")
+            stri=[]
+            for st in row:
+                stri.append(st.strip())
+            print(stri[1])
+            print(stri[2])
         sock = socket()
         #dp = Datapath(sock,('127.0.0.1', 39972))
         ofprotoT = dp.ofproto
-        priorityT=1836
+        priorityT=int(stri[2])
         parserT=dp.ofproto_parser
-        matchT=parserT.OFPMatch(in_port=1)
-        actionsT = [parserT.OFPActionOutput(7,
+
+        matchT=parserT.OFPMatch(eth_src = stri[1])
+        actionsT = [parserT.OFPActionOutput(2,
                                             ofprotoT.OFPCML_NO_BUFFER)]
         instT = [parserT.OFPInstructionActions(ofprotoT.OFPIT_APPLY_ACTIONS,
                                                 actionsT)]
