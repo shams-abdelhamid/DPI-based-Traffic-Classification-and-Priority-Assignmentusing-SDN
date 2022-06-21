@@ -3,6 +3,8 @@ from tkinter import Canvas
 
 
 window = tkinter.Tk()
+window.state('zoomed')
+
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 canvas =  Canvas(window, width=screen_width, height=screen_height)
