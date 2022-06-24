@@ -1,0 +1,23 @@
+new ryu test:
+
+1) RYU
+
+cd ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN
+
+ryu-manager --observe-links ~/flowmanager/flowmanager.py ryu_test.py
+
+
+
+2) MININET
+
+cd mininet
+
+sudo python3 topology.py
+
+pingall
+
+3) PORTIA APP
+
+run
+choose time,host,priority then press test
+will be added to flowmanager
