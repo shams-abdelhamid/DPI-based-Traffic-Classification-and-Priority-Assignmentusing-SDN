@@ -32,15 +32,15 @@ time['values'] = ('1', '2', '3', '4', '5')
 time.pack()
 label = Label(root,text='Choose Host').pack()
 host = ttk.Combobox(root)
-os.chdir("../../../../mininet")
-with open('hosts.txt',"r") as flfile:
-            row = flfile.readlines()
-            print(type(row))
-            stri=[]
-            for st in row:
-                stri.append(st.strip())
-os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
-host['values'] = stri
+# os.chdir("../../../../mininet")
+# with open('hosts.txt',"r") as flfile:
+#             row = flfile.readlines()
+#             print(type(row))
+#             stri=[]
+#             for st in row:
+#                 stri.append(st.strip())
+# os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
+# host['values'] = stri
 host.pack()
 label = Label(root,text='Set Priority').pack()
 priority = Entry(root)
