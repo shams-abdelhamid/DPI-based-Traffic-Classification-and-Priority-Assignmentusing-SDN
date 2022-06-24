@@ -67,12 +67,11 @@ class SimpleSwitch13(app_manager.RyuApp):
             mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst)
         print(str(datapath.send_msg(mod)))
-
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         # If you hit this you might want to increase
         # the "miss_send_length" of your switch
-        
+        msg_length = 0
         if ev.msg.msg_len < ev.msg.total_len:
             self.logger.debug("packet truncated: only %s of %s bytes",
                               ev.msg.msg_len, ev.msg.total_len)
@@ -80,11 +79,14 @@ class SimpleSwitch13(app_manager.RyuApp):
         datapath = msg.datapath
         print(datapath.address)
         print('datapath here')
+        print("size of msg is: ")
+        msg_length += msg.msg_len
+        print(msg_length)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
-        print(str(msg.match))
-        print("match here")
+        # print(str(msg.match))
+        # print("match here")
         time = 6
         e = datetime.datetime.now()
         print("The time is: = %s:%s:%s" % (e.hour,e.minute,e.second))
@@ -93,11 +95,10 @@ class SimpleSwitch13(app_manager.RyuApp):
                 data = int(myfile.readline())
                 print("data is %s" % (data))
                 if data == 0:
-                    print("here")
                     with open('time.txt', "w") as other:
                         other.write("1")
                         print("Time is bigger than %s" % (time))
-                if data == "1":
+                if data == 1:
                     print("time.txt gowaha 1")
 
         pkt = packet.Packet(msg.data)
@@ -211,7 +212,7 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         req=parserT.OFPFlowStatsRequest(dp, 0,ofprotoT.OFPTT_ALL,ofprotoT.OFPP_ANY, ofprotoT.OFPG_ANY,0, 0,matchT)
         #req=parserT.OFPTableStatsRequest(dp, 0)
-        print(dp.send_msg(req))
+        #print(dp.send_msg(req))
 
         print("retrieve")
 
@@ -231,4 +232,4 @@ class SimpleSwitch13(app_manager.RyuApp):
                         stat.idle_timeout, stat.hard_timeout, stat.flags,
                         stat.cookie, stat.packet_count, stat.byte_count,
                         stat.match, stat.instructions))
-        self.logger.info('FlowStats: %s', flows)
+        self.logger.info('FlowStats: %s', flows[6])
