@@ -119,6 +119,9 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.mac_to_port.setdefault(dpid, {})
         #self.logger.info("packetsaya in %s %s %s %s", dpid, src, dst, in_port)
         def send():
+            print("ana fe el function")
+            f = open("FL.txt","w")
+            f.write("0")
             self.sendC(datapath)
             print("flows are sent")
 
@@ -139,6 +142,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         with open('FL.txt',"r") as flfile:
             info = int(flfile.read())
             switch_fl(info)
+
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
@@ -195,6 +199,7 @@ class SimpleSwitch13(app_manager.RyuApp):
                 stri.append(st.strip())
             print(stri[1])
             print(stri[2])
+
         sock = socket()
         #dp = Datapath(sock,('127.0.0.1', 39972))
         ofprotoT = dp.ofproto
@@ -232,4 +237,4 @@ class SimpleSwitch13(app_manager.RyuApp):
                         stat.idle_timeout, stat.hard_timeout, stat.flags,
                         stat.cookie, stat.packet_count, stat.byte_count,
                         stat.match, stat.instructions))
-        self.logger.info('FlowStats: %s', flows[6])
+        # self.logger.info('FlowStats: %s', flows[6])

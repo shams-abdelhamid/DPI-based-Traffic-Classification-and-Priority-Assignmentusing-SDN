@@ -1,10 +1,14 @@
 from logging import root
+import os
+import datetime
+import time
 from tkinter import *
 from tkinter import ttk
 import tkinter.font as tkFont
 import tkinter as tk
 from PIL import Image, ImageTk
 from psutil import net_io_counters
+import requests
 
 import tk_tools
 from tkinter import PhotoImage
@@ -136,24 +140,45 @@ class PagePredict(Frame):
 		global current_page
 		if current_page is not None:
 			current_page.pack_forget()
-
+		now = datetime.datetime.now()
+		days={'Saturday':0,'Sunday':1,'Monday':2,'Tuesday':3,'Wednesday':4,'Thursday':5,'Friday':6}
+		hour = time.strftime("%I:%M")
+		def predict():
+			inp = device.get()[-1]
+			r = requests.post('http://127.0.0.1:5000/api',json={'device_id':inp,'day':days[now.strftime("%A")],'start_time':hour,'server':server.get()})
+			print(r.text)
 		helv36 = tkFont.Font(family="Georgia",size=36,weight="bold")
 		label = Label(self, text="Predict Priority", fg = "black", bg=color["lghtgray"], font = helv36)
 		label.pack(padx=10, pady=10)
 		current_page = label
-		label = Label(self,text='Choose Time',bg=color["lghtgray"],font=(11)).pack()
-		time = ttk.Combobox(self)
-		time['values'] = ('1', '2', '3', '4', '5')
-		time.pack()
-		label = Label(self,text='Choose Host',bg=color["lghtgray"],font=(11)).pack()
-		host = ttk.Combobox(self)
-		host.pack()
-		label = Label(self,text='Set Priority',bg=color["lghtgray"],font=(11)).pack()
-		priority = Entry(self)
-		priority.pack()
+		label = Label(self,text='Choose Device',bg=color["lghtgray"],font=(11)).pack()
+		device = ttk.Combobox(self)
+		server = ttk.Combobox(self)
+		os.chdir("../../../../mininet")
+		with open('nodesmap.txt',"r") as flfile:
+			row = flfile.readlines()
+			print(type(row))
+			names=[]
+			device_macs=[]
+			hosts=[]
+			hosts_mac=[]
+			for st in row[0:6]:
+				line = st.strip().split()
+				names.append(line[1])
+				device_macs.append(line[0])
+			for st in row[7:12]:
+				line=st.strip().split()
+				hosts.append(line[1])
+				hosts_mac.append(line[0])
+		os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
+		device['values'] = names
+		device.pack()
+		label = Label(self,text='Choose Server',bg=color["lghtgray"],font=(11)).pack()
+		server['values'] = hosts
+		server.pack()
 		#white text for space
 		Label(self,text='white text',bg=color["lghtgray"],fg="white").pack()
-		button = Button(self,text='Test',font=('quicksand bold',14),height=1,width=9,fg='white',bg=color['blue']).pack()
+		button = Button(self,text='Predict',font=('quicksand bold',14),height=1,width=9,fg='white',bg=color['blue'],command=predict).pack()
 		success = Label(self,text='Success')
 		success.pack_forget()
 
@@ -168,6 +193,19 @@ class PageFlow(Frame):
 		global current_page
 		if current_page is not None:
 			current_page.pack_forget()
+		def flip():
+			f = open("FL.txt","w")
+			f.write("5")
+			input = time.get()
+			input2_p = host.get()
+			input2 = macs[names.index(input2_p)]
+			input3 = priority.get()
+			f = open("sendc.txt","w")
+			f.write(input + "\n")
+			f.write(input2 + "\n")
+			f.write(input3 + "\n")
+			f.close()
+			success.pack()
 
 		helv36 = tkFont.Font(family="Georgia",size=36,weight="bold")
 		label = Label(self, text="Testing Flow", fg = "black", bg=color["lghtgray"], font = helv36)
@@ -179,13 +217,25 @@ class PageFlow(Frame):
 		time.pack()
 		label = Label(self,text='Choose Host',bg=color["lghtgray"],font=(11)).pack()
 		host = ttk.Combobox(self)
+		os.chdir("../../../../mininet")
+		with open('nodesmap.txt',"r") as flfile:
+			row = flfile.readlines()
+			print(type(row))
+			names=[]
+			macs=[]
+			for st in row:
+				line = st.strip().split()
+				names.append(line[1])
+				macs.append(line[0])
+		os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
+		host['values'] = names
 		host.pack()
 		label = Label(self,text='Set Priority',bg=color["lghtgray"],font=(11)).pack()
 		priority = Entry(self)
 		priority.pack()
 		#white text for space
 		Label(self,text='white text',bg=color["lghtgray"],fg="white").pack()
-		button = Button(self,text='Test',font=('quicksand bold',14),height=1,width=9,fg='white',bg=color['blue']).pack()
+		button = Button(self,text='Test',font=('quicksand bold',14),height=1,width=9,fg='white',bg=color['blue'],command=flip).pack()
 		success = Label(self,text='Success')
 		success.pack_forget()
 
@@ -209,12 +259,12 @@ class PageOneDashboard(Frame):
 		#Images
 		self.img = tk.PhotoImage(file = "images/iphonepicc.png")
 
-		label = Label(self, image = self.img, bg=color["lghtgray"]).place(x= 320, y=183)
+		label = Label(self, image = self.img, bg=color["lghtgray"]).place(x= 220, y=183)
 		label = Label(self, image = self.img, bg=color["lghtgray"]).pack(padx=10,pady=10)
-		label = Label(self, image = self.img, bg=color["lghtgray"]).place(x=475,y=183)
-		label = Label(self, text="Device 1", bg=color["lghtgray"]).place(x= 348, y=307)
+		label = Label(self, image = self.img, bg=color["lghtgray"]).place(x=413,y=183)
+		label = Label(self, text="Device 1", bg=color["lghtgray"]).place(x= 241, y=304)
 		label = Label(self, text="Device 2", bg=color["lghtgray"]).pack(padx=10,pady=10)
-		label = Label(self, text="Device 3", bg=color["lghtgray"]).place(x= 499, y=307)
+		label = Label(self, text="Device 3", bg=color["lghtgray"]).place(x= 439, y=304)
 
 		
 		predict_page = Button(self, text="Predict Priority",font=('quicksand bold',14),height=1,width=11, bg = color["blue"], fg = "white", command=lambda:controller.show_frame(PagePredict))
@@ -228,7 +278,7 @@ class PageTwoBandwidth(Frame):
 		frame2 = self
 		helv36 = tkFont.Font(family="Georgia",size=36,weight="bold")
 		label = Label(self, text="Bandwidth Meter", fg = "black", bg=color["lghtgray"], font = helv36)
-		label.grid(row = 0, column = 1,rowspan=2,columnspan=2, sticky = W, padx= 70 ,pady = 20)
+		label.grid(row = 0, column = 1,rowspan=2,columnspan=2, sticky = W, padx= 20 ,pady = 20)
 		# Variables for use in the size() function.
 		KB = float(1024)
 		MB = float(KB ** 2) # 1,048,576
