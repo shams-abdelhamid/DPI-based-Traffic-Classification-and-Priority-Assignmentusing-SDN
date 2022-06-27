@@ -127,7 +127,7 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         def sendtany():
             #self.sendC(datapath)
-            print("kda habal")
+            print("test")
 
         def switch_fl(info):
             switcher ={

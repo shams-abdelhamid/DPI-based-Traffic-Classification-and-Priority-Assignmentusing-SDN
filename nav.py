@@ -134,19 +134,47 @@ def switch():
         # turing button ON:
         btnState = True
 
+os.chdir("../../../../mininet")
+with open('nodesmap.txt',"r") as flfile:
+	row = flfile.readlines()
+	names=[]
+	macs=[]
+	for st in row:
+		line = st.strip().split()
+		names.append(line[1])
+		macs.append(line[0])
+os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
 class PagePredict(Frame):
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		global current_page
 		if current_page is not None:
 			current_page.pack_forget()
+		def send_flow(priority):
+			f = open("FL.txt","w")
+			f.write("5")
+			input = str(datetime.datetime.now())
+			input2_p = device.get()
+			input2 = macs[names.index(input2_p)]
+			input3 = str(priority)
+			f = open("sendc.txt","w")
+			f.write(input + "\n")
+			f.write(input2 + "\n")
+			f.write(input3 + "\n")
+			f.close()
 		now = datetime.datetime.now()
 		days={'Saturday':0,'Sunday':1,'Monday':2,'Tuesday':3,'Wednesday':4,'Thursday':5,'Friday':6}
 		hour = time.strftime("%I:%M")
 		def predict():
 			inp = device.get()[-1]
 			r = requests.post('http://127.0.0.1:5000/api',json={'device_id':inp,'day':days[now.strftime("%A")],'start_time':hour,'server':server.get()})
-			print(r.text)
+			res = int(r.text)
+			prio_max = 6550
+			data_max = 5
+			new_prio = round((prio_max / data_max) * res)
+			print(new_prio)
+			send_flow(new_prio)
+
 		helv36 = tkFont.Font(family="Georgia",size=36,weight="bold")
 		label = Label(self, text="Predict Priority", fg = "black", bg=color["lghtgray"], font = helv36)
 		label.pack(padx=10, pady=10)
@@ -157,7 +185,6 @@ class PagePredict(Frame):
 		os.chdir("../../../../mininet")
 		with open('nodesmap.txt',"r") as flfile:
 			row = flfile.readlines()
-			print(type(row))
 			names=[]
 			device_macs=[]
 			hosts=[]
@@ -217,17 +244,6 @@ class PageFlow(Frame):
 		time.pack()
 		label = Label(self,text='Choose Host',bg=color["lghtgray"],font=(11)).pack()
 		host = ttk.Combobox(self)
-		os.chdir("../../../../mininet")
-		with open('nodesmap.txt',"r") as flfile:
-			row = flfile.readlines()
-			print(type(row))
-			names=[]
-			macs=[]
-			for st in row:
-				line = st.strip().split()
-				names.append(line[1])
-				macs.append(line[0])
-		os.chdir("../ryu/ryu/app/DPI-based-Traffic-Classification-and-Priority-Assignmentusing-SDN")
 		host['values'] = names
 		host.pack()
 		label = Label(self,text='Set Priority',bg=color["lghtgray"],font=(11)).pack()
